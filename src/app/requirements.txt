@@ -1,0 +1,5 @@
+Flask==2.0.3
+Flask-Classful==0.14.2
+Flask-PyMongo==2.3.0
+mysql-connector-python==8.0.29
+datetime
