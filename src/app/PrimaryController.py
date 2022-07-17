@@ -44,8 +44,12 @@ class PrimaryController(FlaskView):
     @route('/file', methods=['POST'])
     def createView(self):
 
-        f = request.files['file']
-        f.save(
+        # extract uploaded form contents
+        uploadedFile = request.files['file']
+        uploadedFileType = request.form["type"]
+
+        # save uploaded file to filesystem
+        uploadedFile.save(
             os.path.join(
                 self.uploads_dir,
                 secure_filename(f.filename)
