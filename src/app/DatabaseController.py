@@ -120,8 +120,7 @@ class DatabaseController:
         # generate cursor for inline command invocation
         self.myCursor = self.myDB.cursor()
 
-        # set path for reading PDF files, set specific table to use to fetch data
-        self.pdfFilePath = "instance/uploads"
+        # set specific table to use to fetch data
         self.tableInScope = "Files"
 
         # use selected database
@@ -146,5 +145,7 @@ class DatabaseController:
         # update local cache here database cache here
         self.myCursor.execute("SELECT SCOPE_IDENTITY();")
         insertedID = self.myCursor.fetchall()
+
+        # fetch inserted record here, update cache.
         print("InsertedID = {}".format(insertedID))
 

@@ -74,7 +74,7 @@ class PrimaryController(FlaskView):
 
         # send file back to client
         return send_from_directory(
-            directory=dbController.pdfFilePath,
+            directory=self.uploads_dir,
             path=recordFromCache['filename'],
             as_attachment=True
         )
@@ -97,15 +97,27 @@ class PrimaryController(FlaskView):
         # check if file with same name already exists on server, 
         # if so, append "_" to end of file
         if os.path.exists(path):
-            print("exists ")
-            print("{}".format(fileName))
-            fileName = "test123.pdf"
-            print("{}".format(fileName))
+
+            # placeholder for extra file count
+            fileExistanceCount = 1
+
+            # work to create new file name
+            while os.path.exists(path):
+
+                # if conflicting file, rename with random integer appended onto end of it
+                fileName = fileName.replace(".pdf", "-{}.pdf".format(fileExistanceCount))
+
+                # update file path
+                path = "{}/{}".format(self.uploads_dir, fileName)
+
+                # increment file existance count for next conflict
+                fileExistanceCount += 1
+            
 
         # save uploaded XLSX file to filesystem
         uploadedFile.save(
             os.path.join(
-                self.uploads_dir,
+                "instance/uploads",
                 secure_filename(fileName)
             )
         )
