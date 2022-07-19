@@ -72,13 +72,22 @@ class PrimaryController(FlaskView):
         # fetch records from cache
         recordFromCache = dbController.return_record_from_cache(id)
 
-        # send file back to client
-        return send_from_directory(
-            directory=self.uploads_dir,
-            path=recordFromCache['filename'],
-            as_attachment=True
-        )
+        # handle record not found in database
+        if recordFromCache == None:
+            notificationHTML = render_template("notification.html")
+            return notificationHTML.replace("INSERT-MESSAGE-HERE","Requested File ID Not Found")
+        else:
+            # send file back to client
+            return send_from_directory(
+                directory=self.uploads_dir,
+                path=recordFromCache['filename'],
+                as_attachment=True
+            )
 
+    # HANDLE 404 ERRORS
+    # @app.errorhandler(404)
+    # def page_not_found(e):
+    #     return render_template('404.html'), 404
 
     # RE-ROUTE TO HOME PAGE             
     @route('/file', methods=['POST'])
@@ -90,12 +99,14 @@ class PrimaryController(FlaskView):
         bearerToken = request.form['tokenField']
         fileName = uploadedFile.filename
         path = "{}/{}".format(self.uploads_dir, fileName)
+        notificationHTML = render_template("notification.html")
 
-        print("REQUIRED VARIABLES: ")
-        print(uploadedFile, uploadedFileType, bearerToken, fileName, path)
-
-        # check if file with same name already exists on server, 
-        # if so, append "_" to end of file
+        # Immediately Reject non XLSX Types
+        if fileName.split(".")[-1].lower() != "xlsx":
+            return notificationHTML.replace("INSERT-MESSAGE-HERE","Only .xlsx files are supported")
+        
+        # check if file with same name exists on server, 
+        # if so, dynamically calculate unique file name
         if os.path.exists(path):
 
             # placeholder for extra file count
@@ -113,14 +124,17 @@ class PrimaryController(FlaskView):
                 # increment file existance count for next conflict
                 fileExistanceCount += 1
             
-
         # save uploaded XLSX file to filesystem
         uploadedFile.save(
             os.path.join(
-                "instance/uploads",
+                self.uploads_dir,
                 secure_filename(fileName)
             )
         )
+            
+        return notificationHTML.replace("INSERT-MESSAGE-HERE","File Successfully Uploaded")
+
+        
 
         # PERFORM CONVERSION TO .PDF HERE
 
@@ -128,6 +142,11 @@ class PrimaryController(FlaskView):
 
         # SAVE METADATA TO DATABASE
         return 'file uploaded successfully'
+
+    # HANDLING 404 ERRORS
+    @route('/<path:path>')
+    def catch_all(self, path):
+        return render_template("index.html")
 
 
 # instantiate PrimaryController FlaskAPI Instance

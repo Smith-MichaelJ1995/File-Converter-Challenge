@@ -104,8 +104,7 @@ class DatabaseController:
         try:
             return self.records[int(uuid)]
         except:
-            print(uuid in self.records.keys())
-            return []
+            return None
 
     # return all records from cache
     def return_all_records_from_cache(self):
