@@ -5,7 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 
 # integrate Flask API Class Libraries
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, redirect
 from flask_classful import FlaskView, route
 
 # integrate Database & MarvelController class controller
@@ -146,7 +146,7 @@ class PrimaryController(FlaskView):
     # HANDLING 404 ERRORS
     @route('/<path:path>')
     def catch_all(self, path):
-        return render_template("index.html")
+        return redirect("/", code=302)
 
 
 # instantiate PrimaryController FlaskAPI Instance
