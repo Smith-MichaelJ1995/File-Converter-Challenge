@@ -58,8 +58,9 @@ class PrimaryController(FlaskView):
                 </tr>
             """.format(fileRecord["filename"], fileRecord["createdBy"], fileRecord["createdAt"], fileRecord["docType"], fileRecord["uuid"])
 
-        # append table records to HTML Table
+        # append table records to HTML Table, Replace Bearer Token
         indexHTML = indexHTML.replace("DYNAMIC-TABLE-CONTENT-REPLACED-HERE", tableRecordsHTML)
+        indexHTML = indexHTML.replace("REPLACE-BEARER-TOKEN-HERE", os.environ['BEARER_TOKEN'])
 
         # read base-template
         return indexHTML
@@ -86,19 +87,34 @@ class PrimaryController(FlaskView):
         # extract uploaded form contents
         uploadedFile = request.files['file']
         uploadedFileType = request.form["type"]
+        bearerToken = request.form['tokenField']
+        fileName = uploadedFile.filename
+        path = "{}/{}".format(self.uploads_dir, fileName)
+
+        print("REQUIRED VARIABLES: ")
+        print(uploadedFile, uploadedFileType, bearerToken, fileName, path)
 
         # check if file with same name already exists on server, 
         # if so, append "_" to end of file
-        if os.path.exists(uploadedFile.filename):
-            uploadedFile.filename = uploadedFile.filename + "_"
+        if os.path.exists(path):
+            print("exists ")
+            print("{}".format(fileName))
+            fileName = "test123.pdf"
+            print("{}".format(fileName))
 
-        # save uploaded file to filesystem
+        # save uploaded XLSX file to filesystem
         uploadedFile.save(
             os.path.join(
                 self.uploads_dir,
-                secure_filename(uploadedFile.filename)
+                secure_filename(fileName)
             )
         )
+
+        # PERFORM CONVERSION TO .PDF HERE
+
+        # SAVE PDF TO FILESYSTEM
+
+        # SAVE METADATA TO DATABASE
         return 'file uploaded successfully'
 
 
