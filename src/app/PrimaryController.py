@@ -5,7 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 
 # integrate Flask API Class Libraries
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_classful import FlaskView, route
 
 # integrate Database & MarvelController class controller
@@ -48,7 +48,13 @@ class PrimaryController(FlaskView):
                     <td>{}</td>
                     <td>{}</td>
                     <td>{}</td>
-                    <td>{}</td>
+                    <td>
+                        <form action="http://localhost:5050/file/{}", method="GET">
+                            <button type="submit" value="submit" class="btn btn-primary">
+                                Click Here
+                            </button>
+                        </form>
+                    </td>
                 </tr>
             """.format(fileRecord["filename"], fileRecord["createdBy"], fileRecord["createdAt"], fileRecord["docType"], fileRecord["uuid"])
 
@@ -59,11 +65,18 @@ class PrimaryController(FlaskView):
         return indexHTML
 
     # ROUTE #1: FETCH FILE FROM DATABASE BY ID. DISPLAY IN INDEX & RETURN METADATA IN HEADERS (UNIT TEST SUPPORT)
-    @route('/file/<name>', methods=['GET'])
-    def getTableData(self, name):
+    @route('/file/<id>', methods=['GET'])
+    def getTableData(self, id):
 
         # fetch records from cache
-        return jsonify(dbController.return_records_from_cache(name))
+        recordFromCache = dbController.return_record_from_cache(id)
+
+        # send file back to client
+        return send_from_directory(
+            directory=dbController.pdfFilePath,
+            path=recordFromCache['filename'],
+            as_attachment=True
+        )
 
 
     # RE-ROUTE TO HOME PAGE             
