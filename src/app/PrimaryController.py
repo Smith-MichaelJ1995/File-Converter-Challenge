@@ -70,8 +70,6 @@ class PrimaryController(FlaskView):
     @route('/file/<id>', methods=['GET'])
     def getTableData(self, id):
 
-        print(dbController.records)
-
         # fetch records from cache
         recordFromCache = dbController.return_record_from_cache(id)
 
@@ -128,16 +126,13 @@ class PrimaryController(FlaskView):
                     secure_filename(fileName)
                 )
             )
-                
-            #return notificationHTML.replace("INSERT-MESSAGE-HERE","File Successfully Uploaded")
-
-            
 
             # PERFORM CONVERSION TO .PDF HERE
 
             # SAVE PDF TO FILESYSTEM
 
             # SAVE REFERENCE INFORMATION TO DATABASE
+            # SUPPORTING ONLY ADDING ONE RECORD AT A TIME TO THE SYSTEM
             insertedRecord = dbController.insert_records(
                 tableRecord=(
                     (
@@ -148,7 +143,9 @@ class PrimaryController(FlaskView):
                     )
                 )
             )
-            return 'file uploaded successfully'
+
+            # provide success message to caller
+            return notificationHTML.replace("INSERT-MESSAGE-HERE", """File Successfully Uploaded: {}""".format(json.dumps(insertedRecord, indent=4)))
 
     # HANDLING 404 ERRORS
     @route('/<path:path>')

@@ -129,22 +129,35 @@ class DatabaseController:
         self.records = self.extract_records_from_database_table(self.tableInScope)
 
     # insert records into databases specified table
-    def insert_records(self, tableRecords):  
+    def insert_records(self, tableRecord):  
         
         # insert records into table
         # DEFINE INSERTION STATEMENT, PROTECT AGAINST SQL INJECTION
-        sqlStatement = """INSERT INTO {} (id, name, comics, image, description) VALUES (%s, %s, %s, %s, %s)""".format(self.tableInScope)
-        
+        sqlStatement = """INSERT INTO {} (filename, createdAt, createdBy, docType) VALUES (%s, %s, %s, %s)""".format(self.tableInScope)
+
         # invoke statement, add records.
-        self.myCursor.execute(sqlStatement, tableRecords)
+        self.myCursor.execute(sqlStatement, tableRecord)
 
         # changes must be commited to the database in order to take effect
         self.myDB.commit()
 
-        # update local cache here database cache here
-        self.myCursor.execute("SELECT SCOPE_IDENTITY();")
-        insertedID = self.myCursor.fetchall()
+        # fetch ID of latest record inserted into database
+        self.myCursor.execute("SELECT id FROM {} WHERE id = (SELECT MAX(id) FROM {})".format(self.tableInScope, self.tableInScope))
+        insertedID = self.myCursor.fetchall()[0][0]
 
-        # fetch inserted record here, update cache.
-        print("InsertedID = {}".format(insertedID))
+        # fetch file instance with given unique identifier
+        self.myCursor.execute("SELECT * FROM {} WHERE id = {}".format(self.tableInScope, insertedID))
+        fileReference = self.myCursor.fetchall()[0]
+
+        # insert newly created object into records cache
+        self.records[fileReference[0]] = {
+            "uuid": fileReference[0],
+            "filename": fileReference[1],
+            "createdAt": fileReference[2],
+            "createdBy": fileReference[3],
+            "docType": fileReference[4] 
+        }
+
+        # return file reference to primary controller for clear display to user
+        return fileReference
 
