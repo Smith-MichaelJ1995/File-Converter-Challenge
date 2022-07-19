@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 
 # https://pythonbasics.org/flask-upload-file/#:~:text=It%20is%20very%20simple%20to,it%20to%20the%20required%20location.
 from werkzeug.utils import secure_filename
@@ -69,25 +70,30 @@ class PrimaryController(FlaskView):
     @route('/file/<id>', methods=['GET'])
     def getTableData(self, id):
 
+        print(dbController.records)
+
         # fetch records from cache
         recordFromCache = dbController.return_record_from_cache(id)
 
         # handle record not found in database
         if recordFromCache == None:
             notificationHTML = render_template("notification.html")
-            return notificationHTML.replace("INSERT-MESSAGE-HERE","Requested File ID Not Found")
+            return notificationHTML.replace("INSERT-MESSAGE-HERE","Requested File Not Found")
         else:
-            # send file back to client
-            return send_from_directory(
-                directory=self.uploads_dir,
-                path=recordFromCache['filename'],
-                as_attachment=True
-            )
 
-    # HANDLE 404 ERRORS
-    # @app.errorhandler(404)
-    # def page_not_found(e):
-    #     return render_template('404.html'), 404
+            # location for downloadable file path
+            path = self.uploads_dir + "/" + recordFromCache['filename']
+
+            # send file back to client
+            if os.path.exists(path):
+                return send_from_directory(
+                    directory=self.uploads_dir,
+                    path=recordFromCache['filename'],
+                    as_attachment=True
+                )
+            else:
+                notificationHTML = render_template("notification.html")
+                return notificationHTML.replace("INSERT-MESSAGE-HERE","This file reference exists in this database, but it has been deleted from the server..")
 
     # RE-ROUTE TO HOME PAGE             
     @route('/file', methods=['POST'])
@@ -107,41 +113,42 @@ class PrimaryController(FlaskView):
         
         # check if file with same name exists on server, 
         # if so, dynamically calculate unique file name
-        if os.path.exists(path):
-
-            # placeholder for extra file count
-            fileExistanceCount = 1
-
-            # work to create new file name
-            while os.path.exists(path):
-
-                # if conflicting file, rename with random integer appended onto end of it
-                fileName = fileName.replace(".pdf", "-{}.pdf".format(fileExistanceCount))
-
-                # update file path
-                path = "{}/{}".format(self.uploads_dir, fileName)
-
-                # increment file existance count for next conflict
-                fileExistanceCount += 1
-            
-        # save uploaded XLSX file to filesystem
-        uploadedFile.save(
-            os.path.join(
-                self.uploads_dir,
-                secure_filename(fileName)
+        elif os.path.exists(path):
+            return notificationHTML.replace(
+                "INSERT-MESSAGE-HERE",
+                "File with name '{}' has already been uploaded, please upload file with unique name.".format(fileName)
             )
-        )
+
+        else:
             
-        return notificationHTML.replace("INSERT-MESSAGE-HERE","File Successfully Uploaded")
+            # save uploaded XLSX file to filesystem
+            uploadedFile.save(
+                os.path.join(
+                    self.uploads_dir,
+                    secure_filename(fileName)
+                )
+            )
+                
+            #return notificationHTML.replace("INSERT-MESSAGE-HERE","File Successfully Uploaded")
 
-        
+            
 
-        # PERFORM CONVERSION TO .PDF HERE
+            # PERFORM CONVERSION TO .PDF HERE
 
-        # SAVE PDF TO FILESYSTEM
+            # SAVE PDF TO FILESYSTEM
 
-        # SAVE METADATA TO DATABASE
-        return 'file uploaded successfully'
+            # SAVE REFERENCE INFORMATION TO DATABASE
+            insertedRecord = dbController.insert_records(
+                tableRecord=(
+                    (
+                        fileName,
+                        datetime.datetime.now(),
+                        bearerToken,
+                        uploadedFileType
+                    )
+                )
+            )
+            return 'file uploaded successfully'
 
     # HANDLING 404 ERRORS
     @route('/<path:path>')
