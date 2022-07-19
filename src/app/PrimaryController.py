@@ -1,7 +1,7 @@
-# import hashlib
-# import requests
 import json
 import os
+
+# https://pythonbasics.org/flask-upload-file/#:~:text=It%20is%20very%20simple%20to,it%20to%20the%20required%20location.
 from werkzeug.utils import secure_filename
 
 # integrate Flask API Class Libraries
@@ -29,8 +29,34 @@ class PrimaryController(FlaskView):
     @route('/', methods=["GET"])
     def index(self):
 
+        # gather homepage HTML into table
+        indexHTML = render_template("index.html")
+
+        # fetch records from database cache, display into table
+        fileRecords = dbController.return_all_records_from_cache()
+
+        # stage HTML placeholder for data/table records
+        tableRecordsHTML = """"""
+
+        # dynamically build table records based on file records from database
+        for fileRecord in fileRecords:
+
+            # build table row based on fileRecord
+            tableRecordsHTML += """
+                <tr>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                </tr>
+            """.format(fileRecord["filename"], fileRecord["createdBy"], fileRecord["createdAt"], fileRecord["docType"], fileRecord["uuid"])
+
+        # append table records to HTML Table
+        indexHTML = indexHTML.replace("DYNAMIC-TABLE-CONTENT-REPLACED-HERE", tableRecordsHTML)
+
         # read base-template
-        return render_template("index.html")
+        return indexHTML
 
     # ROUTE #1: FETCH FILE FROM DATABASE BY ID. DISPLAY IN INDEX & RETURN METADATA IN HEADERS (UNIT TEST SUPPORT)
     @route('/file/<name>', methods=['GET'])
@@ -48,11 +74,16 @@ class PrimaryController(FlaskView):
         uploadedFile = request.files['file']
         uploadedFileType = request.form["type"]
 
+        # check if file with same name already exists on server, 
+        # if so, append "_" to end of file
+        if os.path.exists(uploadedFile.filename):
+            uploadedFile.filename = uploadedFile.filename + "_"
+
         # save uploaded file to filesystem
         uploadedFile.save(
             os.path.join(
                 self.uploads_dir,
-                secure_filename(f.filename)
+                secure_filename(uploadedFile.filename)
             )
         )
         return 'file uploaded successfully'

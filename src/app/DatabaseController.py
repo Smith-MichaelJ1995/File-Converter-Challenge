@@ -17,7 +17,6 @@ class DatabaseController:
         # perform 5 total tries, separated by 15 minutes each
         while attemptCount < 5:
 
-            # perform connection attempt
             try:
 
                 # perform connection attempt
@@ -57,13 +56,15 @@ class DatabaseController:
     def extract_records_from_database_table(self, tableName):
 
         # define search results placeholder
-        searchResults = []
+        searchResults = {}
 
         # determine if table exists
         self.myCursor.execute("SELECT * FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_SCHEMA = '{}' AND TABLE_NAME = '{}';".format(
             os.environ['SQL_DATABASE'],
             tableName
         ))
+
+        # fetch all records from database
         tables = self.myCursor.fetchall()
 
         # only continue processing if we've found results for this table
@@ -74,73 +75,40 @@ class DatabaseController:
             rows = self.myCursor.fetchall()
 
             # fetch all records from all rows
-            for index, row in enumerate(rows):
+            for row in rows:
 
                 # extract key/value fields
-                heroNumber = row[0]
-                heroName = row[1]
-                heroComics = row[2]
-                heroThumbnail = row[3]
-                heroDescription = row[4]
+                uuid = row[0]
+                filename = row[1]
+                createdAt = row[2]
+                createdBy = row[3]
+                docType = row[4]
 
                 # append search results for future processing
-                searchResults.append({
-                    "id": heroNumber,
-                    "name": heroName,
-                    "comics": heroComics,
-                    "img": heroThumbnail,
-                    "description": heroDescription 
-                })
+                searchResults[uuid] = {
+                    "uuid": uuid,
+                    "filename": filename,
+                    "createdAt": createdAt,
+                    "createdBy": createdBy,
+                    "docType": docType 
+                }
+        else:
+            print("No Records Found For Table, Returning Empty Dataset")
 
         return searchResults
-
-    # perform operation on class instantiation
-    def populate(self):
-
-        # create temporary records placeholder
-        records = {}
-
-        # fetch all tables in "intel" database
-        self.myCursor.execute("show TABLES;")
-        tables = self.myCursor.fetchall()
-
-        # traverse through all tables
-        for table in tables:
-
-            # extract column name
-            tableName = table[0]
-            
-            # append item to records container
-            records[tableName] = self.extract_records_from_database_table(tableName)
-            
-        return records
-
-    # given string, remove bad sql characters
-    def remove_bad_characters(self, inpt):
-        for badChar in self.badChars:
-            inpt = inpt.replace(badChar, "")
-        return inpt
         
-    # return all table names within intel database
-    def return_table_names(self):
-        return self.records.keys()
-
     # return table records to viewer
-    def return_records_from_cache(self, tableName):
-        if tableName in self.records.keys():
-            return self.records[tableName]
-        else:
+    # fetch inside database cache, as opposed to querying manually thru all records
+    # O(1) lookup, vs manually querying thru each record/key and checking for existance
+    def return_record_from_cache(self, uuid):
+        try:
+            return self.records[uuid]
+        except:
+            return []
 
-            # extract record from database
-            databaseRecords = self.extract_records_from_database_table(tableName)
-
-            # only update cache if we've found the specified table data
-            if len(databaseRecords) > 0:
-                self.records[tableName] = databaseRecords
-            
-            # return database records to caller
-            return databaseRecords
-        
+    # return all records from cache
+    def return_all_records_from_cache(self):
+        return self.records.values()
 
     # instantiate expected variables
     def __init__(self):
@@ -151,29 +119,31 @@ class DatabaseController:
         # generate cursor for inline command invocation
         self.myCursor = self.myDB.cursor()
 
-        # declare list of known bad characters for safety
-        self.badChars = ['&','<','>','/','\\','"',"'",'?','+']
+        # set path for reading PDF files, set specific table to use to fetch data
+        self.pdfFilePath = "instance/uploads"
+        self.tableInScope = "Files"
 
         # use selected database
         self.myCursor.execute("USE {};".format(os.environ['SQL_DATABASE']))
 
         # populate records from database
-        self.records = self.populate()
+        self.records = self.extract_records_from_database_table(self.tableInScope)
 
     # insert records into databases specified table
-    def insert_records(self, tableName, tableRecords):  
+    def insert_records(self, tableRecords):  
         
-        # create table
-        cmd = """CREATE TABLE {} (id INTEGER, name VARCHAR(255), comics VARCHAR(1000), image VARCHAR(255), description VARCHAR(1000));""".format(tableName)
-        #cmd = """CREATE TABLE spectrum (id INTEGER, name VARCHAR(255), image VARCHAR(255), description VARCHAR(1000));"""
-        self.myCursor.execute(cmd)
-
         # insert records into table
         # DEFINE INSERTION STATEMENT, PROTECT AGAINST SQL INJECTION
-        sqlStatement = """INSERT INTO {} (id, name, comics, image, description) VALUES (%s, %s, %s, %s, %s)""".format(tableName)
+        sqlStatement = """INSERT INTO {} (id, name, comics, image, description) VALUES (%s, %s, %s, %s, %s)""".format(self.tableInScope)
         
         # invoke statement, add records.
-        self.myCursor.executemany(sqlStatement, tableRecords)
+        self.myCursor.execute(sqlStatement, tableRecords)
 
         # changes must be commited to the database in order to take effect
         self.myDB.commit()
+
+        # update local cache here database cache here
+        self.myCursor.execute("SELECT SCOPE_IDENTITY();")
+        insertedID = self.myCursor.fetchall()
+        print("InsertedID = {}".format(insertedID))
+
