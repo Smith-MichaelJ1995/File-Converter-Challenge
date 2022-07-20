@@ -120,7 +120,7 @@ class DatabaseController:
         self.myCursor = self.myDB.cursor()
 
         # set specific table to use to fetch data
-        self.tableInScope = "Files"
+        self.tableInScope = "PDF"
 
         # use selected database
         self.myCursor.execute("USE {};".format(os.environ['SQL_DATABASE']))

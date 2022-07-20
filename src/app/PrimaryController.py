@@ -11,9 +11,11 @@ from flask_classful import FlaskView, route
 
 # integrate Database & MarvelController class controller
 from DatabaseController import DatabaseController
+from PDFController import PDFController
 
 # Instantiate Supporting Classes
 dbController = DatabaseController()
+pdfController = PDFController()
 
 # instantiate app instance
 app = Flask(__name__)
@@ -101,42 +103,45 @@ class PrimaryController(FlaskView):
         uploadedFile = request.files['file']
         uploadedFileType = request.form["type"]
         bearerToken = request.form['tokenField']
-        fileName = uploadedFile.filename
-        path = "{}/{}".format(self.uploads_dir, fileName)
+        uploadedFileName = uploadedFile.filename
+
+        # generate paths for file processing
+        sourceXlsxPath = "{}/{}".format(
+            self.uploads_dir,
+            uploadedFileName
+        )
+        targetPDFName = uploadedFileName.split(".xlsx")[0] + ".pdf"
+        targetPDFPath = "{}/{}".format(
+            self.uploads_dir,
+            targetPDFName
+        )
+
+        # render notification template for dynamic updates
         notificationHTML = render_template("notification.html")
 
         # Immediately Reject non XLSX Types
-        if fileName.split(".")[-1].lower() != "xlsx":
+        if uploadedFileName.split(".")[-1].lower() != "xlsx":
             return notificationHTML.replace("INSERT-MESSAGE-HERE","Only .xlsx files are supported")
         
         # check if file with same name exists on server, 
         # if so, dynamically calculate unique file name
-        elif os.path.exists(path):
+        elif os.path.exists(targetPDFPath):
             return notificationHTML.replace(
                 "INSERT-MESSAGE-HERE",
-                "File with name '{}' has already been uploaded, please upload file with unique name.".format(fileName)
+                "File with path '{}' has already been uploaded, please upload file with unique name.".format(targetPDFPath)
             )
 
         else:
-            
-            # save uploaded XLSX file to filesystem
-            uploadedFile.save(
-                os.path.join(
-                    self.uploads_dir,
-                    secure_filename(fileName)
-                )
-            )
 
-            # PERFORM CONVERSION TO .PDF HERE
-
-            # SAVE PDF TO FILESYSTEM
+            # PERFORM CONVERSION TO .PDF HERE & SAVE PDF TO FILESYSTEM
+            pdfController.fileConversionDriver(sourceXlsxFile=uploadedFile, targetPDFPath=targetPDFPath, )
 
             # SAVE REFERENCE INFORMATION TO DATABASE
             # SUPPORTING ONLY ADDING ONE RECORD AT A TIME TO THE SYSTEM
             insertedRecord = dbController.insert_records(
                 tableRecord=(
                     (
-                        fileName,
+                        targetPDFName,
                         datetime.datetime.now(),
                         bearerToken,
                         uploadedFileType
