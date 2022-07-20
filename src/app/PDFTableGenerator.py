@@ -3,8 +3,9 @@
 from fpdf import FPDF
 
 class PDFTableGenerator(FPDF):
+
     # build PDF table with data fields/attributes provided
-    def create_table(self, table_data, title='', data_size = 10, title_size=12, align_data='L', align_header='L', cell_width='even', x_start='x_default',emphasize_data=[], emphasize_style=None,emphasize_color=(0,0,0)): 
+    def create_table(self, table_data, title='', data_size = 10, title_size=20, align_data='L', align_header='L', maxColumnLength=75): 
         """
         table_data: 
                     list of lists with first element being list of headers
@@ -38,9 +39,6 @@ class PDFTableGenerator(FPDF):
         
         """
 
-        # instantiate max line/column length
-        maxLength = 115
-
         # Get Maximum Width of Every Column
         def get_col_widths():
             
@@ -58,22 +56,28 @@ class PDFTableGenerator(FPDF):
                     value_length = self.get_string_width(cell_value)
 
                     # set maximum length for each column, enable wrapping
-                    if value_length > longest and value_length < maxLength:
+                    if value_length > longest and value_length < maxColumnLength:
                         longest = value_length
-                    elif value_length > longest and value_length > maxLength:
-                        longest = maxLength
+                    elif value_length > longest and value_length > maxColumnLength:
+                        longest = maxColumnLength
 
                 # stage column values for table
                 col_widths.append(longest + 2) # add 2 for padding
 
             return col_widths
-            
+
         # extracting header/row data
         header = table_data[0]
         data = table_data[1:]
         
         # set file properties
         line_height = self.font_size * 2.5
+
+        # CREATE TABLE INSTANCE LOGIC BEGINS HERE
+        if title != '':
+            self.set_font(size=title_size)
+            self.multi_cell(0, line_height, title, border=0, align='j', ln=3, max_line_height=self.font_size)
+            self.ln(line_height) # move cursor back to the left margin
 
         # fetch column widths from helper function
         col_width = get_col_widths()

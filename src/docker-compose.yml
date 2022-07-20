@@ -22,11 +22,13 @@ services:
       - db
     command: python PrimaryController.py
     environment:
-      SQL_DATABASE: intel
+      SQL_DATABASE: files
+      SQL_TABLE: PDF
       SQL_HOST: db
       SQL_PASSWORD: root
       SQL_PORT: '3306'
       SQL_USER: root
+      BEARER_TOKEN: "123e4567-e89b-12d3-a456-42661417400"
     links:
     - db
     restart: on-failure
