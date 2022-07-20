@@ -1,5 +1,5 @@
-# Marvel Impossible Travel Challenge
-Project capable of querying Marvel API for Character/Comic records and seeding results into local database for further processing. Integrated latest UI technologies to enhance experience and data readability.
+# XLSX To PDF Converter Challenge
+Project capable of converting uploaded Excel files to PDF's and seeding results into local database for further processing. Integrated UI technologies to enhance experience and data readability.
 
 ## Design/Reference Architecture
 2-tier Flask/MySQL application, each hosted as separate containers, orchestrated via docker-compose.
@@ -17,7 +17,7 @@ Project capable of querying Marvel API for Character/Comic records and seeding r
 
 
 ## Getting Started
-1. Clone Repo: `git clone https://github.com/Smith-MichaelJ1995/Marvel-Impossible-Travel-Challenge`
+1. Clone Repo: `git clone https://github.com/Smith-MichaelJ1995/File-Converter-Challenge.git`
 2. Key Generation & Test-Case Support: `pip install pyyaml`, `pip install requests`.
 3. Ensure Docker Daemon Running: <ENSURE RUNNING>
 4. Build + Run Containers: `sh build.sh`
@@ -33,3 +33,7 @@ I've created a series of unit-tests to validate records between the database cac
 
 ## Authors
  - Michael J. Smith
+
+
+ # NOTE TO SELF:
+1. MYSQL "command not found": export PATH=${PATH}:/usr/local/mysql/bin
