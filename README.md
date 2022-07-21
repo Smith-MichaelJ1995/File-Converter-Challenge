@@ -42,9 +42,13 @@ This applications supports conversion of XLSX (tabular data) into PDFs. The UI s
 ## Unit Testing
 I've created a series of unit-tests to validate accuracy of XLSX-PDF tabular conversion. Each folder contains a respective xlsx/pdf file. The list below contains links to folder & test-case details. 
 1. Basic 5x5 With Numbers & "Lorem Ipsum"
+    - https://github.com/Smith-MichaelJ1995/File-Converter-Challenge/tree/main/unit_testing/Basic%205x5%20With%20Numbers%20%26%20%22Lorem%20Ipsum%22
 2. Multiple Sheets, Varying Table Sizes (Multi-Sheet)
-3. Table Containing 15 Columns (Max Columns)
+    - https://github.com/Smith-MichaelJ1995/File-Converter-Challenge/tree/main/unit_testing/Multiple%20Sheets%2C%20Varying%20Table%20Sizes%20(Multi-Sheet)
+3. Table Containing 15 Columns (Max Columns):
+    - https://github.com/Smith-MichaelJ1995/File-Converter-Challenge/tree/main/unit_testing/Table%20Containing%2015%20Columns%20(Max%20Columns)
 4. Table With Circa 15 Words Per Cell (Max Columns & Max Text)
+    - https://github.com/Smith-MichaelJ1995/File-Converter-Challenge/tree/main/unit_testing/Table%20With%20Circa%2015%20Words%20Per%20Cell%20(Max%20Columns%20%26%20Max%20Text)
 
 ## Authors
  - Michael J. Smith
