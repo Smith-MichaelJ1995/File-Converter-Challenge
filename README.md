@@ -3,7 +3,7 @@ Project capable of converting uploaded Excel files to PDF's and seeding results 
 
 ## Design/Reference Architecture
 2-tier Flask/MySQL application, each hosted as separate containers, orchestrated via docker-compose.
-![Reference Architecture Diagram](artifacts/ref-arch.png?raw=true "Reference Architecture")
+![Reference Architecture Diagram](artifacts/ref-arch.jpg?raw=true "Reference Architecture")
 
 ### Technical Notes/Design Considerations
 This applications supports conversion of XLSX (tabular data) into PDFs. The UI supports uploading files to server and listing the successfully converted files available for download.
