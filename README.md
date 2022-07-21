@@ -12,7 +12,12 @@ This applications supports conversion of XLSX (tabular data) into PDFs. The UI s
 3. **MySQL:** Since the OpenAPI specification listed a finite-set of DB fields (name, createdDate, createdBy, type) ETC, I decided to implement a relational-database. Also, schema only requires one table to satisfy this required functionalites. **NOTE:** I am storing the files on the system, and staging relative paths & other file data in the DB. Upon file retrieval I'm using the path to programmatically fetch the file from the server.
 4. **XLSX -> PDF File Conversion:** Upon .XLSX file upload to server, the .PDF controller uses Pandas to process the excel into to programmatic object for cleansing and manipulation. From there, I adopted and modified a script that works on-top of FPDF to generate dynamic table contents. This library creates flexible table columns based on contents, however, it will only allow cells to grow to a fixed width length, after this point the cells wrap. I programmatically calculate the width of each page my multiplying the number of columns by fixed max of cell length. This ensures we'll never encounter a scenario where the table grows outside the page.
 5. **Usage Orchestration:** Docker + Docker Compose allows me the ability to package all dependencies while preserving application functionality and communication between containers.
-6. **Edge-Cases & Other Considerations:** This solution cannot handle macros, formulas, image conversion or formatting of cells (text, highlighting, color, background, font, etc). In the application, I wrote logic to reject the upload if the file selected is anything other than .XLSX. I am setting the target filename to preserve the same name of the XLSX file. With that being said, the application rejects the upload if there's a file that already exists on the server with the same name.
+6. **Edge-Cases & Other Considerations:** 
+- This solution cannot handle macros, formulas, image conversion or formatting of cells (text, highlighting, color, background, font, etc). 
+- In the application, I wrote logic to reject the upload if the file selected is anything other than .XLSX. I am setting the target filename to preserve the same name of the XLSX file. With that being said, the application rejects the upload if there's a file that already exists on the server with the same name. 
+- Using Unicode font to handle characters outside supported range for font.
+- Make sure XLSX doesn't have any excess/empty data columns. If so, the document size will be greatly larger than size of table.
+- For complex excels (multiple rows, columns, sheets), upload could take up to 10-15 seconds.
 
 ## Pre-Req's
 ### System/Software Installation 
@@ -31,20 +36,16 @@ This applications supports conversion of XLSX (tabular data) into PDFs. The UI s
 4. Instantiate Web-Application (New Terminal, Same Directory): `sh build-run.sh`
     - This script invokes "docker compose build" & "docker compose up"
 5. Open browser to localhost:5050 ![Homepage](artifacts/homepage.png?raw=true "Application Homepage")
-    - Please test following cases listed below 
+    - For complex excels (multiple rows, columns, sheets), upload could take up to 10-15 seconds.
+    - Please test following cases listed below.
 
 ## Unit Testing
 I've created a series of unit-tests to validate accuracy of XLSX-PDF tabular conversion. Each folder contains a respective xlsx/pdf file. The list below contains links to folder & test-case details. 
-1. Basic 5x5 With Numbers & "Lorem Ipsum": 
-2. Multiple Sheets, Varying Table Sizes (Multi-Sheet):
-3. Table Containing 15 Columns (Max Columns):
-4. Table With 15 Words Per Cell (Max Text): 
-5. Table Containing Overflowing Rows/Records (Large Data):
-6. Chaos Case (Multi-Sheet, Multi-Column, Multi-Words, Overflowing Records):
-
-
-
-<!-- 3. Confirm Console Output: ![Unit Test Results](artifacts/unit-tests.png?raw=true "Unit Test Results") -->
+1. Basic 5x5 With Numbers & "Lorem Ipsum"
+2. Multiple Sheets, Varying Table Sizes (Multi-Sheet)
+3. Table Containing 15 Columns (Max Columns)
+4. Table With Circa 15 Words Per Cell (Max Columns & Max Text): 
+5. Chaos Case (Multi-Sheet, Multi-Column, Multi-Words, Overflowing Records)
 
 ## Authors
  - Michael J. Smith
