@@ -44,9 +44,7 @@ I've created a series of unit-tests to validate accuracy of XLSX-PDF tabular con
 1. Basic 5x5 With Numbers & "Lorem Ipsum"
 2. Multiple Sheets, Varying Table Sizes (Multi-Sheet)
 3. Table Containing 15 Columns (Max Columns)
-4. Table With Circa 15 Words Per Cell (Max Columns & Max Text): 
-5. Chaos Case (Multi-Sheet, Multi-Column, Multi-Words, Overflowing Records)
+4. Table With Circa 15 Words Per Cell (Max Columns & Max Text)
 
 ## Authors
  - Michael J. Smith
-
