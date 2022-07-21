@@ -99,7 +99,7 @@ class DatabaseController:
         
     # return table records to viewer
     # fetch inside database cache, as opposed to querying manually thru all records
-    # O(1) lookup, vs manually querying thru each record/key and checking for existance
+    # O(1) LOOKUP, AS OPPOSED TO MANUALLY QUERYING THRU EACH RECORD/KEY AND CHECK FOR EXISTANCE
     def return_record_from_cache(self, uuid):
         try:
             return self.records[int(uuid)]

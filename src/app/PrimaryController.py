@@ -106,10 +106,6 @@ class PrimaryController(FlaskView):
         uploadedFileName = uploadedFile.filename
 
         # generate paths for file processing
-        sourceXlsxPath = "{}/{}".format(
-            self.uploads_dir,
-            uploadedFileName
-        )
         targetPDFName = uploadedFileName.split(".xlsx")[0] + ".pdf"
         targetPDFPath = "{}/{}".format(
             self.uploads_dir,

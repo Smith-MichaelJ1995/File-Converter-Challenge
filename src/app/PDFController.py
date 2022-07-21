@@ -62,6 +62,3 @@ class PDFController(FPDF):
             print(e)
             
             return None
-
-
-    
