@@ -49,6 +49,8 @@ I've created a series of unit-tests to validate accuracy of XLSX-PDF tabular con
     - https://github.com/Smith-MichaelJ1995/File-Converter-Challenge/tree/main/unit_testing/Table%20Containing%2015%20Columns%20(Max%20Columns)
 4. Table With Circa 15 Words Per Cell (Max Columns & Max Text)
     - https://github.com/Smith-MichaelJ1995/File-Converter-Challenge/tree/main/unit_testing/Table%20With%20Circa%2015%20Words%20Per%20Cell%20(Max%20Columns%20%26%20Max%20Text)
+5. Chaos Case (Multi-Record, Multi-Column, Multi-Sheet, Special Characters)
+    - 
 
 ## Authors
  - Michael J. Smith
