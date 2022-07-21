@@ -20,8 +20,10 @@ class PDFController(FPDF):
         xlsxSheetNames = xlsxFile.keys()
 
         # instantiate PDF object/instance
+        # Adding Unicode font (uses UTF-8)
         pdf = PDFTableGenerator("L", "mm")
-        pdf.set_font("Times", size=10)
+        pdf.add_font('DejaVu', fname='fonts/DejaVuSans.ttf')
+        pdf.set_font("DejaVu", size=10)
 
         # iterate through all sheets in file
         for sheet_name in xlsxSheetNames:
